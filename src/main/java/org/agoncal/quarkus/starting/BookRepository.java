@@ -55,4 +55,3 @@ public class BookRepository {
         return getBook(bookId).map(Book::getReviews).orElse(List.of());
     }
 }
-
