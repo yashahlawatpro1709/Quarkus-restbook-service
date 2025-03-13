@@ -8,6 +8,7 @@ import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.annotations.jaxrs.PathParam;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -66,9 +67,10 @@ public class BookResource {
 
     @GET
     @Path("/overdue")
-    public List<Book> getOverdueBooks(){
+    public List<Book> getOverdueBooks() {
         return repository.getAllBooks().stream().filter(Book::isOverdue).toList();
     }
+
     @POST
     @Path("/{id}/review")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -80,13 +82,16 @@ public class BookResource {
             return Response.status(Response.Status.NOT_FOUND).entity("Book not found").build();
         }
     }
+
     @GET
     @Path("/{id}/reviews")
-    public List<Review> getReviews(@PathParam("id") int id){
+    public List<Review> getReviews(@PathParam("id") int id) {
         return repository.getReviews(id);
     }
+
     @Inject
     AnalyticsService analyticsService;
+
     @POST
     @Path("/{id}/borrow/{username}")
     public Response borrowBook(@PathParam("id") int id, @PathParam("username") String username) {
@@ -99,6 +104,7 @@ public class BookResource {
             return Response.status(Response.Status.BAD_REQUEST).entity("Book is already borrowed").build();
         }
     }
+
     @POST
     @Path("/{id}/return")
     public Response returnBook(@PathParam("id") int id) {
@@ -111,6 +117,7 @@ public class BookResource {
             return Response.status(Response.Status.BAD_REQUEST).entity("Book was not borrowed").build();
         }
     }
+
     @GET
     @Path("/most-borrowed")
     public Response getMostBorrowedBooks(@QueryParam("topN") @DefaultValue("5") int topN) {
@@ -124,6 +131,7 @@ public class BookResource {
         List<String> mostActiveUsers = analyticsService.getMostActiveUsers(topN);
         return Response.ok(mostActiveUsers).build();
     }
+
     @GET
     @Path("/return-count")
     public Response getBookReturnCount() {
@@ -145,4 +153,19 @@ public class BookResource {
         return Response.ok(lastReturnTime).build();
     }
 
+    @Inject
+    DeliveryService deliveryService;
+
+    @POST
+    @Path("/{id}/deliver")
+    public Response requestHomeDelivery(@PathParam("id") int id,
+                                        @QueryParam("username") String username,
+                                        @QueryParam("address") String address) {
+        if (username == null || address == null) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Username and address are required").build();
+        }
+        boolean success = deliveryService.processDelivery(id, username, address);
+        return success ? Response.ok("Book delivery requested").build()
+                : Response.status(Response.Status.BAD_REQUEST).entity("Book not available for delivery").build();
+    }
 }
