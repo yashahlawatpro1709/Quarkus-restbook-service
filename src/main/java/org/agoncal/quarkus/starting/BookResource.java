@@ -9,6 +9,7 @@ import org.jboss.logging.Logger;
 import org.jboss.resteasy.annotations.jaxrs.PathParam;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Path("/api/books")
@@ -63,31 +64,6 @@ public class BookResource {
         return Response.ok(body).build();
     }
 
-    @POST
-    @Path("/{id}/borrow/{username}")
-    public Response borrowBook(@PathParam("id") int id, @PathParam("username") String username) {
-        logger.info(username + " is borrowing book ID: " + id);
-        boolean success = repository.borrowBook(id, username);
-
-        if (success) {
-            return Response.ok("Book borrowed successfully by " + username).build();
-        } else {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Book is already borrowed").build();
-        }
-    }
-
-    @POST
-    @Path("/{id}/return")
-    public Response returnBook(@PathParam("id") int id) {
-        logger.info("Returning book ID: " + id);
-        boolean success = repository.returnBook(id);
-
-        if (success) {
-            return Response.ok("Book returned successfully").build();
-        } else {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Book was not borrowed").build();
-        }
-    }
     @GET
     @Path("/overdue")
     public List<Book> getOverdueBooks(){
@@ -109,6 +85,64 @@ public class BookResource {
     public List<Review> getReviews(@PathParam("id") int id){
         return repository.getReviews(id);
     }
+    @Inject
+    AnalyticsService analyticsService;
+    @POST
+    @Path("/{id}/borrow/{username}")
+    public Response borrowBook(@PathParam("id") int id, @PathParam("username") String username) {
+        logger.info(username + " is borrowing book ID: " + id);
+        boolean success = repository.borrowBook(id, username);
+        if (success) {
+            analyticsService.recordBorrowing(id, username);
+            return Response.ok("Book borrowed successfully by " + username).build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Book is already borrowed").build();
+        }
+    }
+    @POST
+    @Path("/{id}/return")
+    public Response returnBook(@PathParam("id") int id) {
+        logger.info("Returning book ID: " + id);
+        boolean success = repository.returnBook(id);
+        if (success) {
+            analyticsService.recordReturning(id, "SomeUsername");
+            return Response.ok("Book returned successfully").build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Book was not borrowed").build();
+        }
+    }
+    @GET
+    @Path("/most-borrowed")
+    public Response getMostBorrowedBooks(@QueryParam("topN") @DefaultValue("5") int topN) {
+        List<Integer> mostBorrowedBooks = analyticsService.getMostBorrowedBooks(topN);
+        return Response.ok(mostBorrowedBooks).build();
+    }
+
+    @GET
+    @Path("/most-active-users")
+    public Response getMostActiveUsers(@QueryParam("topN") @DefaultValue("5") int topN) {
+        List<String> mostActiveUsers = analyticsService.getMostActiveUsers(topN);
+        return Response.ok(mostActiveUsers).build();
+    }
+    @GET
+    @Path("/return-count")
+    public Response getBookReturnCount() {
+        Map<Integer, Integer> returnCounts = analyticsService.getBookReturnCount();
+        return Response.ok(returnCounts).build();
+    }
+
+    @GET
+    @Path("/user-returns")
+    public Response getUserReturns() {
+        Map<String, Integer> userReturns = analyticsService.getUserReturns();
+        return Response.ok(userReturns).build();
+    }
+
+    @GET
+    @Path("/last-return-time")
+    public Response getLastReturnTime() {
+        Map<String, Long> lastReturnTime = analyticsService.getLastReturnTime();
+        return Response.ok(lastReturnTime).build();
+    }
 
 }
-
