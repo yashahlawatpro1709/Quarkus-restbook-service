@@ -29,7 +29,7 @@ public class BookRepository {
     }
 
     public void addBook(Book book) {
-        books.add(book);  // Now it will work as 'books' is mutable
+        books.add(book);
     }
 
     public boolean borrowBook(int id, String username) {

@@ -13,7 +13,7 @@ public class DeliveryService {
         if (deliveredBooks.contains((bookId))) {
             return false;
         }
-        System.out.println("Delivering book ID" + bookId + "to" + username + "at" + address);
+        System.out.println("Delivering book ID " + bookId  + " to " + username  + " at " +  address);
         deliveredBooks.add(bookId);
         return true;
     }
