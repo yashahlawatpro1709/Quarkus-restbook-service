@@ -93,5 +93,22 @@ public class BookResource {
     public List<Book> getOverdueBooks(){
         return repository.getAllBooks().stream().filter(Book::isOverdue).toList();
     }
+    @POST
+    @Path("/{id}/review")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addReview(@PathParam("id") int id, Review review) {
+        boolean success = repository.addReview(id, review);
+        if (success) {
+            return Response.status(Response.Status.CREATED).entity("Review added successfully").build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).entity("Book not found").build();
+        }
+    }
+    @GET
+    @Path("/{id}/reviews")
+    public List<Review> getReviews(@PathParam("id") int id){
+        return repository.getReviews(id);
+    }
+
 }
 

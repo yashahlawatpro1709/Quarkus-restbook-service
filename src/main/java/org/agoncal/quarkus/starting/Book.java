@@ -4,6 +4,8 @@ import io.smallrye.common.constraint.NotNull;
 import java.time.temporal.ChronoUnit;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Book {
     public int id;
@@ -16,6 +18,7 @@ public class Book {
     public String borrowedBy = null;
     private LocalDate borrowDate;
     private LocalDate dueDate;
+    private List<Review> reviews =new ArrayList<>();
     public Book() {
     }
 
@@ -87,5 +90,11 @@ public class Book {
     }
     public boolean isOverdue(){
         return isBorrowed && LocalDate.now().isEqual(dueDate);
+    }
+    public void addReview(Review review){
+        reviews.add(review);
+    }
+    public List<Review> getReviews(){
+        return reviews;
     }
 }
