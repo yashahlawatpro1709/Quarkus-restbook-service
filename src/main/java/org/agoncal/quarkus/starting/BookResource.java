@@ -168,4 +168,24 @@ public class BookResource {
         return success ? Response.ok("Book delivery requested").build()
                 : Response.status(Response.Status.BAD_REQUEST).entity("Book not available for delivery").build();
     }
+
+    @Inject
+    OpenAIService openAIService;
+    @Inject
+    BookRepository bookRepository;
+
+    @POST
+    @Path("/{id}/ask")
+    public Response askBook(@PathParam("id") int id, String userQuestion) {
+        Optional<Book> bookOpt = bookRepository.getBook(id);
+        if (bookOpt.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND).entity("\"{\\\"error\\\": \\\"Book not found\\\"}\"").build();
+        }
+        Book book = bookOpt.get();
+        String prompt = "Summarize the book '" + book.getTitle() + "' by " + book.getAuthor() +
+                ", published in " + book.getYear() + ". Genre: " + book.getGenre() +
+                ". User asked: " + userQuestion;
+        String openAIResponse = openAIService.chatWithOpenAI(prompt);
+        return Response.ok(openAIResponse).build();
+    }
 }
