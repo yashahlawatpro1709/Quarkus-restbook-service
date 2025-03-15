@@ -84,7 +84,7 @@ With an **AI-powered feature**, books that users search for are automatically **
 
 ### 1️⃣ Clone the repository:
 ```sh
- git clone https://github.com/YashAhlawat/Rest-Book.git
+ https://github.com/yashahlawatpro1709/quarkus-ai-library-service.git
  cd Rest-Book
 ```
 
