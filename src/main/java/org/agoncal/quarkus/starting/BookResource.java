@@ -1,13 +1,13 @@
 package org.agoncal.quarkus.starting;
 
 import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
 import jakarta.validation.constraints.Null;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.annotations.jaxrs.PathParam;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -187,5 +187,24 @@ public class BookResource {
                 ". User asked: " + userQuestion;
         String openAIResponse = openAIService.chatWithOpenAI(prompt);
         return Response.ok(openAIResponse).build();
+    }
+    @Inject
+    OpenAIBookData openAIBookData;
+    @Inject
+    LibraryManager libraryManager;
+
+    @POST
+    @Path("/search")
+    public Response searchBook(JsonObject request) {
+        String bookTitle = request.getString("title");
+        String aiResponse = openAIBookData.searchBook(bookTitle);
+        return Response.ok(aiResponse).build();
+    }
+
+    @GET
+    @Path("/library")
+    public Response getAllBooksFromLibrary() {
+        List<Book> books = libraryManager.getBooks();
+        return Response.ok(books).build();
     }
 }
