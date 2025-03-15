@@ -7,7 +7,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.annotations.jaxrs.PathParam;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
